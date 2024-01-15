@@ -20,18 +20,19 @@ type User struct {
 }
 
 type App struct {
-	AppID            uint
-	StoreURL         string
-	Name             string
-	Type             AppType
-	ShortDescription string
-	HeroImageURL     string
-	LogoImageURL     string
-	IconImageURL     string
-	Description      string
-	ReleaseDate      string
-	Developer        string
-	Publisher        string
+	AppID              uint
+	StoreURL           string
+	Name               string
+	Type               AppType
+	ShortDescription   string
+	BackgroundImageURL string
+	CoverImageURL      string
+	LogoImageURL       string
+	IconImageURL       string
+	Description        string
+	ReleaseDate        string
+	Developer          string
+	Publisher          string
 }
 
 type AppType string
@@ -54,6 +55,12 @@ const (
 	AppTypeSeries      AppType = "series"
 	AppTypeComic       AppType = "comic"
 	AppTypeBeta        AppType = "beta"
+)
+
+const (
+	CDNCoverImageURL  = "https://steamcdn-a.akamaihd.net/steam/apps/%d/library_600x900_2x.jpg"
+	CDNLogoImageURL   = "https://steamcdn-a.akamaihd.net/steam/apps/%d/logo.png"
+	CDNHeaderImageURL = "https://steamcdn-a.akamaihd.net/steam/apps/%d/library_hero.jpg"
 )
 
 type SteamUseCase struct {
@@ -137,6 +144,8 @@ func (s *SteamUseCase) GetOwnedGames(ctx context.Context, steamID string) ([]*Ap
 		res[i] = new(App)
 		res[i].AppID = game.AppID
 		res[i].Name = game.Name
+		res[i].BackgroundImageURL = fmt.Sprintf(CDNHeaderImageURL, game.AppID)
+		res[i].CoverImageURL = fmt.Sprintf(CDNCoverImageURL, game.AppID)
 		if len(game.ImgLogoURL) > 0 {
 			res[i].LogoImageURL = fmt.Sprintf("%s/%d/%s.jpg", imgBaseURL, game.AppID, game.ImgLogoURL)
 		}
@@ -169,18 +178,19 @@ func (s *SteamUseCase) GetAppDetails(ctx context.Context, appID int) (*App, erro
 		res.StoreURL = fmt.Sprintf("https://store.steampowered.com/app/%d", appID)
 		if app.Success {
 			res = &App{
-				AppID:            uint(app.Data.AppID),
-				StoreURL:         fmt.Sprintf("https://store.steampowered.com/app/%d", app.Data.AppID),
-				Name:             app.Data.Name,
-				Type:             AppType(app.Data.Type),
-				ShortDescription: app.Data.ShortDescription,
-				HeroImageURL:     app.Data.HeaderImage,
-				LogoImageURL:     "",
-				IconImageURL:     "",
-				Description:      app.Data.DetailedDescription,
-				ReleaseDate:      "Coming Soon",
-				Developer:        strings.Join(app.Data.Developers, ","),
-				Publisher:        strings.Join(app.Data.Publishers, ","),
+				AppID:              uint(app.Data.AppID),
+				StoreURL:           fmt.Sprintf("https://store.steampowered.com/app/%d", app.Data.AppID),
+				Name:               app.Data.Name,
+				Type:               AppType(app.Data.Type),
+				ShortDescription:   app.Data.ShortDescription,
+				BackgroundImageURL: fmt.Sprintf(CDNHeaderImageURL, app.Data.AppID),
+				CoverImageURL:      fmt.Sprintf(CDNCoverImageURL, app.Data.AppID),
+				LogoImageURL:       fmt.Sprintf(CDNLogoImageURL, app.Data.AppID),
+				IconImageURL:       "",
+				Description:        app.Data.DetailedDescription,
+				ReleaseDate:        "Coming Soon",
+				Developer:          strings.Join(app.Data.Developers, ","),
+				Publisher:          strings.Join(app.Data.Publishers, ","),
 			}
 			if !app.Data.ReleaseDate.ComingSoon {
 				res.ReleaseDate = app.Data.ReleaseDate.Date

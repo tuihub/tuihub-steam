@@ -63,13 +63,14 @@ func (h Handler) PullApp(ctx context.Context, req *porter.PullAppRequest) (
 			Version:     "",
 			ImageUrls:   nil,
 		},
-		Name:             a.Name,
-		Type:             ToPBAppType(a.Type),
-		ShortDescription: a.ShortDescription,
-		IconImageUrl:     "",
-		HeroImageUrl:     a.HeroImageURL,
-		Tags:             nil,
-		AltNames:         nil,
+		Name:               a.Name,
+		Type:               ToPBAppType(a.Type),
+		ShortDescription:   a.ShortDescription,
+		IconImageUrl:       "",
+		BackgroundImageUrl: a.BackgroundImageURL,
+		CoverImageUrl:      a.CoverImageURL,
+		Tags:               nil,
+		AltNames:           nil,
 	}}, nil
 }
 
@@ -87,19 +88,25 @@ func (h Handler) PullAccountAppRelation(ctx context.Context, req *porter.PullAcc
 			Source: tuihub.WellKnownToString(
 				librarian.WellKnownAppSource_WELL_KNOWN_APP_SOURCE_STEAM,
 			),
-			SourceAppId:      strconv.Itoa(int(a.AppID)),
-			SourceUrl:        nil,
-			Details:          nil,
-			Name:             a.Name,
-			Type:             0,
-			ShortDescription: "",
-			IconImageUrl:     a.IconImageURL,
-			HeroImageUrl:     a.HeroImageURL,
-			Tags:             nil,
-			AltNames:         nil,
+			SourceAppId:        strconv.Itoa(int(a.AppID)),
+			SourceUrl:          nil,
+			Details:            nil,
+			Name:               a.Name,
+			Type:               0,
+			ShortDescription:   "",
+			IconImageUrl:       a.IconImageURL,
+			BackgroundImageUrl: a.BackgroundImageURL,
+			CoverImageUrl:      a.CoverImageURL,
+			Tags:               nil,
+			AltNames:           nil,
 		}
 	}
 	return &porter.PullAccountAppRelationResponse{AppList: appList}, nil
+}
+
+func (h Handler) SearchApp(ctx context.Context, request *porter.SearchAppRequest) (*porter.SearchAppResponse, error) {
+	// TODO implement me
+	panic("implement me")
 }
 
 func (h Handler) PullFeed(ctx context.Context, request *porter.PullFeedRequest) (

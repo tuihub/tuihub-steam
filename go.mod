@@ -7,8 +7,8 @@ require (
 	github.com/go-kratos/kratos/v2 v2.7.2
 	github.com/gocolly/colly/v2 v2.1.0
 	github.com/google/go-querystring v1.1.0
-	github.com/tuihub/protos v0.3.0
-	github.com/tuihub/tuihub-go v0.0.5
+	github.com/tuihub/protos v0.3.4
+	github.com/tuihub/tuihub-go v0.0.6
 )
 
 require (
