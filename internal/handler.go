@@ -8,16 +8,16 @@ import (
 	librarian "github.com/tuihub/protos/pkg/librarian/v1"
 	"github.com/tuihub/tuihub-go"
 	"github.com/tuihub/tuihub-steam/internal/biz"
-
-	"github.com/go-kratos/kratos/v2/errors"
 )
 
 type Handler struct {
+	porter.UnimplementedLibrarianPorterServiceServer
 	steam *biz.SteamUseCase
 }
 
 func NewHandler(apiKey string) *Handler {
 	return &Handler{
+		UnimplementedLibrarianPorterServiceServer: porter.UnimplementedLibrarianPorterServiceServer{},
 		steam: biz.NewSteamUseCase(apiKey),
 	}
 }
@@ -39,9 +39,9 @@ func (h Handler) PullAccount(ctx context.Context, req *porter.PullAccountRequest
 	}}, nil
 }
 
-func (h Handler) PullApp(ctx context.Context, req *porter.PullAppRequest) (
-	*porter.PullAppResponse, error) {
-	appID, err := strconv.Atoi(req.GetAppId().GetSourceAppId())
+func (h Handler) PullAppInfo(ctx context.Context, req *porter.PullAppInfoRequest) (
+	*porter.PullAppInfoResponse, error) {
+	appID, err := strconv.Atoi(req.GetAppInfoId().GetSourceAppId())
 	if err != nil {
 		return nil, err
 	}
@@ -49,13 +49,13 @@ func (h Handler) PullApp(ctx context.Context, req *porter.PullAppRequest) (
 	if err != nil {
 		return nil, err
 	}
-	return &porter.PullAppResponse{App: &librarian.App{
+	return &porter.PullAppInfoResponse{AppInfo: &librarian.AppInfo{
 		Id:          nil,
 		Internal:    false,
-		Source:      req.GetAppId().GetSource(),
-		SourceAppId: req.GetAppId().GetSourceAppId(),
+		Source:      req.GetAppInfoId().GetSource(),
+		SourceAppId: req.GetAppInfoId().GetSourceAppId(),
 		SourceUrl:   &a.StoreURL,
-		Details: &librarian.AppDetails{ // TODO
+		Details: &librarian.AppInfoDetails{ // TODO
 			Description: a.Description,
 			ReleaseDate: a.ReleaseDate,
 			Developer:   a.Developer,
@@ -74,19 +74,19 @@ func (h Handler) PullApp(ctx context.Context, req *porter.PullAppRequest) (
 	}}, nil
 }
 
-func (h Handler) PullAccountAppRelation(ctx context.Context, req *porter.PullAccountAppRelationRequest) (
-	*porter.PullAccountAppRelationResponse, error) {
+func (h Handler) PullAccountAppRelation(ctx context.Context, req *porter.PullAccountAppInfoRelationRequest) (
+	*porter.PullAccountAppInfoRelationResponse, error) {
 	al, err := h.steam.GetOwnedGames(ctx, req.GetAccountId().GetPlatformAccountId())
 	if err != nil {
 		return nil, err
 	}
-	appList := make([]*librarian.App, len(al))
+	appList := make([]*librarian.AppInfo, len(al))
 	for i, a := range al {
-		appList[i] = &librarian.App{ // TODO
+		appList[i] = &librarian.AppInfo{ // TODO
 			Id:       nil,
 			Internal: false,
 			Source: tuihub.WellKnownToString(
-				librarian.WellKnownAppSource_WELL_KNOWN_APP_SOURCE_STEAM,
+				librarian.WellKnownAppInfoSource_WELL_KNOWN_APP_INFO_SOURCE_STEAM,
 			),
 			SourceAppId:        strconv.Itoa(int(a.AppID)),
 			SourceUrl:          nil,
@@ -101,22 +101,7 @@ func (h Handler) PullAccountAppRelation(ctx context.Context, req *porter.PullAcc
 			AltNames:           nil,
 		}
 	}
-	return &porter.PullAccountAppRelationResponse{AppList: appList}, nil
-}
-
-func (h Handler) SearchApp(ctx context.Context, request *porter.SearchAppRequest) (*porter.SearchAppResponse, error) {
-	// TODO implement me
-	panic("implement me")
-}
-
-func (h Handler) PullFeed(ctx context.Context, request *porter.PullFeedRequest) (
-	*porter.PullFeedResponse, error) {
-	return nil, errors.BadRequest("not supported", "")
-}
-
-func (h Handler) PushFeedItems(ctx context.Context, request *porter.PushFeedItemsRequest) (
-	*porter.PushFeedItemsResponse, error) {
-	return nil, errors.BadRequest("not supported", "")
+	return &porter.PullAccountAppInfoRelationResponse{AppInfos: appList}, nil
 }
 
 func ToPBAppType(t biz.AppType) librarian.AppType {

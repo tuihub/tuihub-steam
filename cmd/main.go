@@ -37,8 +37,8 @@ func main() {
 					},
 				},
 			},
-			SupportedAppSources: []string{
-				tuihub.WellKnownToString(librarian.WellKnownAppSource_WELL_KNOWN_APP_SOURCE_STEAM),
+			SupportedAppInfoSources: []string{
+				tuihub.WellKnownToString(librarian.WellKnownAppInfoSource_WELL_KNOWN_APP_INFO_SOURCE_STEAM),
 			},
 			SupportedFeedSources:        nil,
 			SupportedNotifyDestinations: nil,
