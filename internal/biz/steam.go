@@ -114,7 +114,7 @@ func (s *SteamUseCase) GetUser(ctx context.Context, steamID string) (*User, erro
 		SteamID:    steamID,
 		Name:       resp.Nickname,
 		ProfileURL: resp.ProfileURL,
-		AvatarURL:  resp.Avatar,
+		AvatarURL:  resp.AvatarFull,
 	}, nil
 }
 
