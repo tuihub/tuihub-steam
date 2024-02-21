@@ -8,7 +8,7 @@ require (
 	github.com/gocolly/colly/v2 v2.1.0
 	github.com/google/go-querystring v1.1.0
 	github.com/tuihub/protos v0.4.1
-	github.com/tuihub/tuihub-go v0.0.7
+	github.com/tuihub/tuihub-go v0.0.8
 )
 
 require (

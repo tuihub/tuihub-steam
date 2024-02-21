@@ -248,6 +248,8 @@ github.com/tuihub/tuihub-go v0.0.6 h1:YyAdRzrb32yy5Z+RZvrokzccUrlKn/t7FqFt+H8RZR
 github.com/tuihub/tuihub-go v0.0.6/go.mod h1:bp+9manMtnYCjvI5ClX1fgfuzrRMDLPFeUsm6PH1kqs=
 github.com/tuihub/tuihub-go v0.0.7 h1:0hI8UW6YJ54M9FnlExoGJJvGuJgeqDMVR3cn9f2OMgE=
 github.com/tuihub/tuihub-go v0.0.7/go.mod h1:wjE/znjLE1GsXw+Es4prW4Y9ouRc4HkdfX4Jqu9/wiE=
+github.com/tuihub/tuihub-go v0.0.8 h1:e/SKbGL6/RBwc4g7+FYElK3xzLJhtxHpvw/TsVApyGw=
+github.com/tuihub/tuihub-go v0.0.8/go.mod h1:wjE/znjLE1GsXw+Es4prW4Y9ouRc4HkdfX4Jqu9/wiE=
 github.com/tv42/httpunix v0.0.0-20150427012821-b75d8614f926/go.mod h1:9ESjWnEqriFuLhtthL60Sar/7RFoluCcXsuvEwTV5KM=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
 golang.org/x/crypto v0.0.0-20180904163835-0709b304e793/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
