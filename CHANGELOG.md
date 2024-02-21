@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.2](https://github.com/tuihub/tuihub-steam/compare/v0.0.1...v0.0.2) (2024-02-21)
+
+
+### Features
+
+* upgrade sdk version to v0.0.8 ([5e65a64](https://github.com/tuihub/tuihub-steam/commit/5e65a648e067dbbbc4b9a7a8541db262f7d372f4))
+
 ## 0.0.1 (2024-02-21)
 
 
