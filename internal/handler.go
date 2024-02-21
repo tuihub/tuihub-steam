@@ -74,7 +74,7 @@ func (h Handler) PullAppInfo(ctx context.Context, req *porter.PullAppInfoRequest
 	}}, nil
 }
 
-func (h Handler) PullAccountAppRelation(ctx context.Context, req *porter.PullAccountAppInfoRelationRequest) (
+func (h Handler) PullAccountAppInfoRelation(ctx context.Context, req *porter.PullAccountAppInfoRelationRequest) (
 	*porter.PullAccountAppInfoRelationResponse, error) {
 	al, err := h.steam.GetOwnedGames(ctx, req.GetAccountId().GetPlatformAccountId())
 	if err != nil {
