@@ -71,6 +71,20 @@ func (s *WebAPI) GetOwnedGames(ctx context.Context, req model.GetOwnedGamesReque
 	return &res.Response, nil
 }
 
+func (s *WebAPI) GetAppList(ctx context.Context, req model.GetAppListRequest) (*model.AppList, error) {
+	res := new(model.GetAppListResponse)
+	reqStr, err := query.Values(req)
+	if err != nil {
+		return nil, err
+	}
+	err = s.Get(ctx, "ISteamApps/GetAppList/v2", reqStr, res)
+	if err != nil {
+		return nil, err
+	}
+
+	return &res.AppList, nil
+}
+
 func (s *WebAPI) Get(ctx context.Context, path string, query url.Values, data interface{}) error {
 	query.Set("format", "json")
 	query.Set("key", s.key)

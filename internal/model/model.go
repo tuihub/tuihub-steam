@@ -106,7 +106,7 @@ type GetOwnedGamesRequest struct {
 	// if set, skip unvetted store apps
 	SkipUnvettedApps bool `url:"skip_unvetted_apps,omitempty"`
 	// will return appinfo in this language
-	Language string `url:"language,omitempty"`
+	Language LanguageCode `url:"language,omitempty"`
 	// true if we want even more details (capsule, sortas, and capabilities) about each game.
 	// include_appinfo must also be true.
 	IncludeExtendedAppInfo bool `url:"include_extended_appinfo,omitempty"`
@@ -310,4 +310,20 @@ func (c AppDetailsCategory) Names() []string {
 		names[i] = v.Description
 	}
 	return names
+}
+
+type GetAppListRequest struct {
+	// will return appinfo in this language
+	Language LanguageCode `url:"language,omitempty"`
+}
+
+type GetAppListResponse struct {
+	AppList AppList `json:"applist"`
+}
+
+type AppList struct {
+	Apps []struct {
+		AppID int    `json:"appid"`
+		Name  string `json:"name"`
+	} `json:"apps"`
 }

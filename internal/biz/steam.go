@@ -5,8 +5,12 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"sync"
+	"time"
 
+	"github.com/tuihub/tuihub-go/logger"
 	"github.com/tuihub/tuihub-steam/internal/client"
+	"github.com/tuihub/tuihub-steam/internal/data"
 	"github.com/tuihub/tuihub-steam/internal/model"
 
 	"github.com/go-kratos/kratos/v2/errors"
@@ -66,6 +70,13 @@ const (
 type SteamUseCase struct {
 	c      *client.Steam
 	locale Locale
+
+	appNameIndex               *data.Data
+	appIDNameMap               map[string]string
+	appNameIndexUpdateAt       time.Time
+	appNameIndexUpdateInterval time.Duration
+	appNameIndexUpdateMu       sync.Mutex
+	appNameIndexInitialized    bool
 }
 
 func NewSteamUseCase(apiKey string) *SteamUseCase {
@@ -73,14 +84,20 @@ func NewSteamUseCase(apiKey string) *SteamUseCase {
 	if err != nil {
 		panic(err)
 	}
-	return &SteamUseCase{
-		c:      cli,
-		locale: GetLocale(),
+	index, err := data.NewData()
+	if err != nil {
+		panic(err)
 	}
-}
-
-func (s *SteamUseCase) FeatureEnabled() bool {
-	return s.c != nil
+	return &SteamUseCase{
+		c:                          cli,
+		locale:                     GetLocale(),
+		appNameIndex:               index,
+		appIDNameMap:               make(map[string]string),
+		appNameIndexUpdateAt:       time.Time{},
+		appNameIndexUpdateInterval: 24 * time.Hour, //nolint:gomnd // no need
+		appNameIndexUpdateMu:       sync.Mutex{},
+		appNameIndexInitialized:    false,
+	}
 }
 
 func (s *SteamUseCase) language() model.LanguageCode {
@@ -97,9 +114,6 @@ func (s *SteamUseCase) language() model.LanguageCode {
 }
 
 func (s *SteamUseCase) GetUser(ctx context.Context, steamID string) (*User, error) {
-	if !s.FeatureEnabled() {
-		return nil, errors.BadRequest("request disabled feature", "")
-	}
 	id, err := strconv.ParseUint(steamID, 10, 64)
 	if err != nil {
 		return nil, err
@@ -119,9 +133,6 @@ func (s *SteamUseCase) GetUser(ctx context.Context, steamID string) (*User, erro
 }
 
 func (s *SteamUseCase) GetOwnedGames(ctx context.Context, steamID string) ([]*App, error) {
-	if !s.FeatureEnabled() {
-		return nil, errors.BadRequest("request disabled feature", "")
-	}
 	id, err := strconv.ParseUint(steamID, 10, 64)
 	if err != nil {
 		return nil, err
@@ -157,9 +168,6 @@ func (s *SteamUseCase) GetOwnedGames(ctx context.Context, steamID string) ([]*Ap
 }
 
 func (s *SteamUseCase) GetAppDetails(ctx context.Context, appID int) (*App, error) {
-	if !s.FeatureEnabled() {
-		return nil, errors.BadRequest("request disabled feature", "")
-	}
 	resp, err := s.c.GetAppDetails(ctx, model.GetAppDetailsRequest{
 		AppIDs:      []int{appID},
 		CountryCode: "",
@@ -199,4 +207,86 @@ func (s *SteamUseCase) GetAppDetails(ctx context.Context, appID int) (*App, erro
 		break
 	}
 	return res, nil
+}
+
+func (s *SteamUseCase) SearchAppByName(ctx context.Context, name string) ([]*App, error) {
+	go s.updateAppNameIndex(context.Background())
+	s.waitForAppNameIndexInitialized()
+	appIDs, err := s.appNameIndex.Search(name)
+	if err != nil {
+		return nil, err
+	}
+	if len(appIDs) == 0 {
+		return nil, errors.NotFound("app not found", "")
+	}
+	var res []*App
+	for _, id := range appIDs {
+		originName, ok := s.appIDNameMap[id]
+		if !ok {
+			continue
+		}
+		var appID int
+		appID, err = strconv.Atoi(id)
+		if err != nil {
+			continue
+		}
+		res = append(res, &App{
+			AppID:              uint(appID),
+			StoreURL:           fmt.Sprintf("https://store.steampowered.com/app/%d", appID),
+			Name:               originName,
+			Type:               AppTypeGame,
+			ShortDescription:   "",
+			BackgroundImageURL: fmt.Sprintf(CDNHeaderImageURL, appID),
+			CoverImageURL:      fmt.Sprintf(CDNCoverImageURL, appID),
+			LogoImageURL:       fmt.Sprintf(CDNLogoImageURL, appID),
+			IconImageURL:       "",
+			Description:        "",
+			ReleaseDate:        "",
+			Developer:          "",
+			Publisher:          "",
+		})
+	}
+	return res, nil
+}
+
+func (s *SteamUseCase) appNameIndexOutdated() bool {
+	return s.appNameIndexUpdateAt.IsZero() || time.Since(s.appNameIndexUpdateAt) > s.appNameIndexUpdateInterval
+}
+
+func (s *SteamUseCase) waitForAppNameIndexInitialized() {
+	for {
+		if s.appNameIndexInitialized {
+			return
+		}
+		time.Sleep(time.Microsecond)
+	}
+}
+
+func (s *SteamUseCase) updateAppNameIndex(ctx context.Context) {
+	if !s.appNameIndexOutdated() {
+		return
+	}
+	if !s.appNameIndexUpdateMu.TryLock() {
+		return
+	}
+	defer s.appNameIndexUpdateMu.Unlock()
+	logger.Info("updating app name index")
+	list, err := s.c.GetAppList(ctx, model.GetAppListRequest{
+		Language: s.language(),
+	})
+	if err != nil {
+		logger.Errorf("update app name index failed: %s", err.Error())
+		s.appNameIndexUpdateAt = time.Now()
+		return
+	}
+	for _, app := range list.Apps {
+		err = s.appNameIndex.Index(app.AppID, app.Name)
+		if err != nil {
+			continue
+		}
+		s.appIDNameMap[strconv.Itoa(app.AppID)] = app.Name
+	}
+	logger.Info("app name index updated")
+	s.appNameIndexInitialized = true
+	s.appNameIndexUpdateAt = time.Now()
 }
