@@ -314,7 +314,7 @@ func (c AppDetailsCategory) Names() []string {
 
 type GetAppListRequest struct {
 	// will return appinfo in this language
-	Language LanguageCode `url:"language,omitempty"`
+	Language LanguageCode `url:"l,omitempty"`
 }
 
 type GetAppListResponse struct {
