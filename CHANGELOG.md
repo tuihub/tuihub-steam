@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.3](https://github.com/tuihub/tuihub-steam/compare/v0.0.2...v0.0.3) (2024-03-11)
+
+
+### Features
+
+* add fallback search ([c6fd87a](https://github.com/tuihub/tuihub-steam/commit/c6fd87ad9812db6a6a4e2bc16115eb256fecc028))
+* impl SearchAppInfo ([d836bc7](https://github.com/tuihub/tuihub-steam/commit/d836bc7d8da4ca02bab263cf15fed58ae42f45fd))
+
 ## [0.0.2](https://github.com/tuihub/tuihub-steam/compare/v0.0.1...v0.0.2) (2024-02-21)
 
 
